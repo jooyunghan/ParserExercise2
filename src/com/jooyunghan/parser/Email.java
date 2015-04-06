@@ -10,8 +10,8 @@ import java.util.Map;
  * Date: 4/7/15 1:57 AM
  */
 class Email {
-    final Map<String, String> header;
-    final String body;
+    private final Map<String, String> header;
+    private final String body;
 
     public Email(Map<String, String> header, String body) {
         this.header = header;

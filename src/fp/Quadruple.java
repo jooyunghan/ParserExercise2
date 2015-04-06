@@ -10,7 +10,7 @@ public class Quadruple<A, B, C, D> {
     public final C _3;
     public final D _4;
 
-    public Quadruple(A a, B b, C c, D d) {
+    private Quadruple(A a, B b, C c, D d) {
         this._1 = a;
         this._2 = b;
         this._3 = c;

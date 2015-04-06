@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 public class Option<T> {
     private final T value;
 
-    private static final Option<?> NONE = new Option<Object>(null);
+    private static final Option<?> NONE = new Option<>(null);
 
     @Override
     public String toString() {
@@ -20,10 +20,11 @@ public class Option<T> {
     }
 
 
-    public Option(T value) {
+    private Option(T value) {
         this.value = value;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> Option<T> none() {
         return (Option<T>) NONE;
     }

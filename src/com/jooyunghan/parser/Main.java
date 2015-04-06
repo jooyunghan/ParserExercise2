@@ -49,17 +49,19 @@ public class Main {
         // header = field*
         // field = (line _line*) and then (key ':' value)
         // _line = space* line
-        Parser<String> line = regex("[^\\n]+\\n").map(s -> s.trim());
+        Parser<String> line = regex("[^\\n]+\\n").map(String::trim);
         Parser<String> _line = regex("[ \\t]+").flatMap(ignore -> line);
         Parser<String> field = seq(line, _line.many())
                 .map((pair) -> Lists.cons(pair._1, pair._2))
                 .map(list -> Lists.toString(list, " "));
         Parser<Map<String, String>> header = field.many()
                 .map(lists -> Lists.map(Strings.split(": "), lists))
-                .map(pairs -> Lists.toMap(pairs));
-        Parser<Email> email = seq(header, string("\n\n"), Parser.rest)
-                .map(triple -> new Email(triple._1, triple._3));
-        return email;
+                .map(Lists::toMap);
+        return seq(
+                header,
+                string("\n\n"),
+                Parser.rest
+        ).map(triple -> new Email(triple._1, triple._3));
     }
 
     private static Parser<Email> getEmailParser1() {
@@ -79,12 +81,12 @@ public class Main {
                 ).map(q -> pair(q._1, q._3));
 
         Parser<Map<String, String>> headerParser =
-                fieldParser.many().map(lists -> Lists.toMap(lists));
+                fieldParser.many().map(Lists::toMap);
 
         return Parser.seq(
                 headerParser,
                 string("\n\n"),
-                regex(".*")
+                rest
         ).map(triple -> new Email(triple._1, triple._3));
     }
 
