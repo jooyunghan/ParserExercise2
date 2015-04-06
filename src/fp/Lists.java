@@ -1,4 +1,6 @@
-package com.jooyunghan.parser;
+package fp;
+
+import fp.Pair;
 
 import java.util.*;
 

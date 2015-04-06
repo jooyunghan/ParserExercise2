@@ -1,27 +1,13 @@
 package com.jooyunghan.parser;
 
+import fp.Lists;
+import fp.Pair;
+import fp.parser.Parser;
+
 import java.util.Map;
 
-import static com.jooyunghan.parser.Pair.pair;
-import static com.jooyunghan.parser.Parser.*;
-
-class Email {
-    final Map<String, String> header;
-    final String body;
-
-    public Email(Map<String, String> header, String body) {
-        this.header = header;
-        this.body = body;
-    }
-
-    @Override
-    public String toString() {
-        return "Email{" +
-                "header=" + Lists.toString(header.entrySet(), "\n") +
-                ", body='" + body + '\'' +
-                '}';
-    }
-}
+import static fp.Pair.pair;
+import static fp.parser.Parser.*;
 
 public class Main {
 
@@ -61,12 +47,11 @@ public class Main {
                 ).map(triple -> pair(triple._1, Lists.toString(triple._3)));
         Parser<Map<String, String>> headerParser =
                 fieldParser.sepBy(string("\n")).map(Lists::toMap);
-        Parser<Email> emailParser =
-                Parser.seq(
-                        headerParser,
-                        string("\n\n"),
-                        regex(".*")
-                ).map(triple -> new Email(triple._1, triple._3));
+        Parser<Email> emailParser = Parser.seq(
+                headerParser,
+                string("\n\n"),
+                regex(".*")
+        ).map(triple -> new Email(triple._1, triple._3));
         System.out.println(emailParser.parse(message));
     }
 

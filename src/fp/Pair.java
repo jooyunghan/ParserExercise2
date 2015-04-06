@@ -1,17 +1,17 @@
-package com.jooyunghan.parser;
+package fp;
 
 /**
  * Created by jooyung.han on 4/6/15.
  */
 public class Pair<T, S> {
-    final T _1;
-    final S _2;
+    public final T _1;
+    public final S _2;
     public Pair(T _1, S _2) {
         this._1 = _1;
         this._2 = _2;
     }
 
-    static <T, S> Pair<T, S> pair(T k, S v) {
+    public static <T, S> Pair<T, S> pair(T k, S v) {
         return new Pair<>(k, v);
     }
 

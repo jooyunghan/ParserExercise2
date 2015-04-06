@@ -1,25 +1,27 @@
-package com.jooyunghan.parser;
+package fp.parser;
+
+import fp.*;
+import fp.functions.Function;
+import fp.functions.Predicate;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.jooyunghan.parser.Lists.cons;
-import static com.jooyunghan.parser.Pair.pair;
-import static com.jooyunghan.parser.Triple.triple;
-import static java.util.Optional.empty;
+import static fp.Lists.cons;
+import static fp.Option.none;
+import static fp.Option.some;
+import static fp.Pair.pair;
+import static fp.Triple.triple;
 
 public interface Parser<T> {
-    Optional<Pair<T, String>> parse(String s);
+    Option<Pair<T, String>> parse(String s);
 
-    Parser<Object> fail = (s) -> empty();
+    Parser<Object> fail = (s) -> none();
     Parser<Character> item = (s) -> s.isEmpty()
-            ? empty()
-            : Optional.of(pair(s.charAt(0), s.substring(1)));
+            ? none()
+            : some(pair(s.charAt(0), s.substring(1)));
 
     static Parser<Character> char_(char c) {
         return item.filter(x -> x == c);
@@ -33,17 +35,17 @@ public interface Parser<T> {
     Parser<Double> double_ = regex("^([-+]?(\\d+\\.?\\d*|\\d*\\.?\\d+))").map(Double::valueOf);
 
     static Parser<String> string(String prefix) {
-        return (s) -> s.startsWith(prefix) ? Optional.of(pair(prefix, s.substring(prefix.length()))) : empty();
+        return (s) -> s.startsWith(prefix) ? some(pair(prefix, s.substring(prefix.length()))) : none();
     }
 
     static Parser<String> regex(String regex) {
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
         return (s) -> {
             Matcher matcher = pattern.matcher(s);
             if (matcher.find() && matcher.start() == 0) {
-                return Optional.of(pair(matcher.group(), s.substring(matcher.end())));
+                return some(pair(matcher.group(), s.substring(matcher.end())));
             } else {
-                return empty();
+                return none();
             }
         };
     }
@@ -74,17 +76,11 @@ public interface Parser<T> {
     }
 
     default Parser<T> or(T defaultValue) {
-        return (s) -> {
-            Optional<Pair<T, String>> result = parse(s);
-            return result.isPresent() ? result : Optional.of(pair(defaultValue, s));
-        };
+        return (s) -> parse(s).orElse(() -> some(pair(defaultValue, s)));
     }
 
     default Parser<T> or(Parser<T> alt) {
-        return (s) -> {
-            Optional<Pair<T, String>> result = parse(s);
-            return result.isPresent() ? result : alt.parse(s);
-        };
+        return (s) -> parse(s).orElse(() -> alt.parse(s));
     }
 
     default <S> Parser<S> map(Function<T, S> f) {
