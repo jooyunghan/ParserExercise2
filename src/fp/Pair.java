@@ -1,5 +1,7 @@
 package fp;
 
+import java.util.Arrays;
+
 /**
  * Created by jooyung.han on 4/6/15.
  */
@@ -37,5 +39,11 @@ public class Pair<T, S> {
     @Override
     public String toString() {
         return "(" + _1 + ", " + _2 + ")";
+    }
+
+    public static <T> Pair<T, T> fromArray(T[] ts) {
+        if (ts.length < 2)
+            throw new IllegalArgumentException(Arrays.toString(ts) + " is not a pair.");
+        return pair(ts[0], ts[1]);
     }
 }

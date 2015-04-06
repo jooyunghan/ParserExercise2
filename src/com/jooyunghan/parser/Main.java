@@ -2,12 +2,16 @@ package com.jooyunghan.parser;
 
 import fp.Lists;
 import fp.Pair;
+import fp.Strings;
+import fp.functions.Function;
 import fp.parser.Parser;
 
 import java.util.Map;
 
 import static fp.Pair.pair;
 import static fp.parser.Parser.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 public class Main {
 
@@ -37,39 +41,56 @@ public class Main {
                 "Content-Type: text/plain;\n" +
                 "\tcharset=utf-8\n";
 
+        assertThat(getEmailParser1().parse(message), is(getEmailParser2().parse(message)));
+    }
+
+    private static Parser<Email> getEmailParser2() {
+        // email = header "\n\n" body
+        // header = field*
+        // field = (line _line*) and then (key ':' value)
+        // _line = space* line
+        Parser<String> line = regex("[^\\n]+\\n").map(s -> s.trim());
+        Parser<String> _line = regex("[ \\t]+").flatMap(ignore -> line);
+        Parser<String> field = seq(line, _line.many())
+                .map((pair) -> Lists.cons(pair._1, pair._2))
+                .map(list -> Lists.toString(list, " "));
+        Parser<Map<String, String>> header = field.many()
+                .map(lists -> Lists.map(Strings.split(": "), lists))
+                .map(pairs -> Lists.toMap(pairs));
+        Parser<Email> email = seq(header, string("\n\n"), Parser.rest)
+                .map(triple -> new Email(triple._1, triple._3));
+        return email;
+    }
+
+    private static Parser<Email> getEmailParser1() {
+        Parser<Character> newline = char_('\n');
+        Parser<Character> noNewline = item.filter(c -> c != '\n');
+        Parser<Character> spaceOrTab = char_(' ').or(char_('\t'));
+
         Parser<Character> contentChar =
-                item.filter(c -> c != '\n').or(regex("\\n[ \\t]+").map(ignore -> ' '));
+                noNewline.or(newline.followedBy(spaceOrTab));
+
         Parser<Pair<String, String>> fieldParser =
                 Parser.seq(
-                        regex("[a-zA-Z-]+"),
+                        regex("[a-zA-Z-]+"),   // Key
                         string(": "),
-                        contentChar.many()
-                ).map(triple -> pair(triple._1, Lists.toString(triple._3)));
+                        contentChar.many().map(Lists::toString).map(replaceAll("\\n[ \\t]*", " ")),
+                        newline
+                ).map(q -> pair(q._1, q._3));
+
         Parser<Map<String, String>> headerParser =
-                fieldParser.sepBy(string("\n")).map(Lists::toMap);
-        Parser<Email> emailParser = Parser.seq(
+                fieldParser.many().map(lists -> Lists.toMap(lists));
+
+        return Parser.seq(
                 headerParser,
                 string("\n\n"),
                 regex(".*")
         ).map(triple -> new Email(triple._1, triple._3));
-        System.out.println(emailParser.parse(message));
     }
 
-    private static void testParsers() {
-        System.out.println(fail.parse("abc"));
-        System.out.println(item.parse("abc"));
-
-        Parser<Character> p = item.filter(c -> Character.isUpperCase(c));
-
-        Parser<String> twoChars =
-                item.flatMap(c1 -> item.map(c2 -> c1 + "" + c2));
-        System.out.println(twoChars.parse("abc"));
-
-        System.out.println(double_.parse("-123abc"));
-
-        System.out.println(regex("[A-Z]{1,3}").parse("Date abc"));
-
-        System.out.println(Character.isWhitespace('\n'));
-        //System.out.println(Parser.item.followedBy(Parser.string("abc")).parse("1abc"));
+    private static Function<String, String> replaceAll(String regex, String replacement) {
+        return s -> s.replaceAll(regex, replacement);
     }
+
+
 }

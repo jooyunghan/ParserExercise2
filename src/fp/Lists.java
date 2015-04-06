@@ -1,6 +1,6 @@
 package fp;
 
-import fp.Pair;
+import fp.functions.Function;
 
 import java.util.*;
 
@@ -8,6 +8,14 @@ import java.util.*;
  * Created by jooyung.han on 4/6/15.
  */
 public class Lists {
+    public static <T, R> List<R> map(Function<T, R> f, List<T> lists) {
+        List<R> result = new ArrayList<>();
+        for (T t : lists) {
+            result.add(f.apply(t));
+        }
+        return result;
+    }
+
     public static <T> List<T> cons(T t, List<T> ts) {
         List<T> result = new ArrayList<>();
         result.add(t);

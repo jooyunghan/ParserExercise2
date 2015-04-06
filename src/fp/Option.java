@@ -16,7 +16,7 @@ public class Option<T> {
 
     @Override
     public String toString() {
-        return isPresent() ? "Option.some(" + value + '}' : "Option.none";
+        return isSome() ? "Option.some(" + value + '}' : "Option.none";
     }
 
 
@@ -32,20 +32,20 @@ public class Option<T> {
         return new Option<>(value);
     }
 
-    public boolean isPresent() {
+    public boolean isSome() {
         return value != null;
     }
 
     public <S> Option<S> map(Function<T, S> f) {
-        return isPresent() ? some(f.apply(value)) : none();
+        return isSome() ? some(f.apply(value)) : none();
     }
 
     public <S> Option<S> flatMap(Function<T, Option<S>> f) {
-        return isPresent() ? f.apply(value) : none();
+        return isSome() ? f.apply(value) : none();
     }
 
     public Option<T> filter(Predicate<T> f) {
-        return isPresent() && f.test(value) ? this : none();
+        return isSome() && f.test(value) ? this : none();
     }
 
     @Override
@@ -65,10 +65,14 @@ public class Option<T> {
     }
 
     public Option<T> orElse(Supplier<Option<T>> f) {
-        return isPresent()? this: f.get();
+        return isSome() ? this : f.get();
     }
 
     public T getOrElse(Supplier<T> f) {
-        return isPresent()? value: f.get();
+        return isSome() ? value : f.get();
+    }
+
+    public T get() {
+        return value;
     }
 }

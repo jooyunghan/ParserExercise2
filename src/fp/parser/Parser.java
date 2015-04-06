@@ -1,6 +1,9 @@
 package fp.parser;
 
-import fp.*;
+import fp.Option;
+import fp.Pair;
+import fp.Quadruple;
+import fp.Triple;
 import fp.functions.Function;
 import fp.functions.Predicate;
 
@@ -13,6 +16,7 @@ import static fp.Lists.cons;
 import static fp.Option.none;
 import static fp.Option.some;
 import static fp.Pair.pair;
+import static fp.Quadruple.quadruple;
 import static fp.Triple.triple;
 
 public interface Parser<T> {
@@ -22,6 +26,7 @@ public interface Parser<T> {
     Parser<Character> item = (s) -> s.isEmpty()
             ? none()
             : some(pair(s.charAt(0), s.substring(1)));
+    Parser<String> rest = (s) -> some(pair(s, ""));
 
     static Parser<Character> char_(char c) {
         return item.filter(x -> x == c);
@@ -75,6 +80,10 @@ public interface Parser<T> {
         return p1.flatMap((T t) -> p2.flatMap((S s) -> p3.map((R r) -> triple(t, s, r))));
     }
 
+    static <A, B, C, D> Parser<Quadruple<A, B, C, D>> seq(Parser<A> p1, Parser<B> p2, Parser<C> p3, Parser<D> p4) {
+        return p1.flatMap(a -> p2.flatMap(b -> p3.flatMap(c -> p4.map(d -> quadruple(a, b, c, d)))));
+    }
+
     default Parser<T> or(T defaultValue) {
         return (s) -> parse(s).orElse(() -> some(pair(defaultValue, s)));
     }
@@ -96,6 +105,12 @@ public interface Parser<T> {
     }
 
     default <S> Parser<T> followedBy(Parser<S> lookAhead) {
-        return (s) -> parse(s).flatMap(pair -> lookAhead.parse(pair._2).map(ignore -> pair));
+        return (s) -> parse(s).flatMap(pair ->
+                lookAhead.parse(pair._2).isSome() ? some(pair) : none());
+    }
+
+    default <S> Parser<T> notFollowedBy(Parser<S> lookAhead) {
+        return (s) -> parse(s).flatMap(pair ->
+                lookAhead.parse(pair._2).isSome() ? none() : some(pair));
     }
 }
