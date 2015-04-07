@@ -8,7 +8,7 @@ import java.util.*;
  * Created by jooyung.han on 4/6/15.
  */
 public class Lists {
-    public static <T, R> List<R> map(Function<T, R> f, List<T> lists) {
+    public static <T, R> List<R> map(Function<? super T, ? extends R> f, List<T> lists) {
         List<R> result = new ArrayList<>();
         for (T t : lists) {
             result.add(f.apply(t));

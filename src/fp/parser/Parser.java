@@ -48,7 +48,7 @@ public interface Parser<T> {
         Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
         return (s) -> {
             Matcher matcher = pattern.matcher(s);
-            if (matcher.find() && matcher.start() == 0) {
+            if (matcher.lookingAt()) {
                 return some(pair(matcher.group(), s.substring(matcher.end())));
             } else {
                 return none();
