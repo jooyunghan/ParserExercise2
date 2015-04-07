@@ -4,6 +4,7 @@ import fp.Option;
 import fp.Pair;
 import fp.Quadruple;
 import fp.Triple;
+import fp.functions.Consumer;
 import fp.functions.Function;
 import fp.functions.Predicate;
 
@@ -112,5 +113,12 @@ public interface Parser<T> {
     default <S> Parser<T> notFollowedBy(Parser<S> lookAhead) {
         return (s) -> parse(s).flatMap(pair ->
                 lookAhead.parse(pair._2).isSome() ? none() : some(pair));
+    }
+
+    default Parser<T> tap(Consumer<T> f) {
+        return map(t -> {
+            f.accept(t);
+            return t;
+        });
     }
 }
