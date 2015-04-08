@@ -60,6 +60,10 @@ public interface Parser<T> {
         return p.flatMap(ignore -> this);
     }
 
+    default Parser<T> suffix(Parser<?> p) {
+        return this.flatMap(t -> p.map(ignore -> t));
+    }
+
     default <S> Parser<List<T>> sepBy(Parser<S> sep) {
         Parser<T> prefixed = prefix(sep);
         return flatMap(t -> prefixed.many().map(ts -> cons(t, ts)));
@@ -120,5 +124,9 @@ public interface Parser<T> {
             f.accept(t);
             return t;
         });
+    }
+
+    default Parser<T> token() {
+        return prefix(space.many());
     }
 }

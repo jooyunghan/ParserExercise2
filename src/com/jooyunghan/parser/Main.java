@@ -5,7 +5,6 @@ import fp.Pair;
 import fp.Strings;
 import fp.functions.Function;
 import fp.parser.Parser;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +20,10 @@ public class Main {
     public static void main(String[] args) throws IOException {
         //testParsers();
 
-        String message = Lists.toString(FileUtils.readLines(new File("testdata/seminar.eml")), "\n");
-        getEmailParser1()
-                .tap(m -> System.out.println(m.getSubject()))
-                .parse(message);
+//        String message = Lists.toString(FileUtils.readLines(new File("testdata/seminar.eml")), "\n");
+//        getEmailParser1()
+//                .tap(m -> System.out.println(m.getSubject()))
+//                .parse(message);
         //assertThat(getEmailParser1().parse(message), is(getEmailParser2().parse(message)));
     }
 
